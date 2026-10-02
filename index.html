@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Battle Arena</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;1,9..144,500&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#09070F;--s:#100C18;--s2:#181226;--p:#8B5CF6;--p2:#A855F7;--lav:#C4B5FD;--y:#F4D000;--y2:#FFE878;--w:#F8F5FF;--m:#9991AA;--line:#2a2140;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%;background:var(--bg);color:var(--w);font:16px/1.5 'DM Sans',system-ui,sans-serif}
+.d{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.02em}
+.i{font-style:italic}
+.lab{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--m);font-weight:700}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.screen{display:none;min-height:100vh;animation:in .6s ease both}.screen.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.btn{background:var(--y);color:#1a1400;font-weight:700;padding:14px 26px;border-radius:99px;transition:.25s;box-shadow:0 6px 0 #a88f00}
+.btn:hover{transform:translateY(-2px);box-shadow:0 8px 0 #a88f00}.btn:active{transform:translateY(4px);box-shadow:0 2px 0 #a88f00}
+.btn.p{background:var(--p);color:#fff;box-shadow:0 6px 0 #5b34b8}.btn.p:hover{box-shadow:0 8px 0 #5b34b8}.btn.p:active{box-shadow:0 2px 0 #5b34b8}
+/* landing */
+#land{display:none;overflow:hidden;position:relative;padding:28px 6vw}
+#land.on{display:block}
+#land:before{content:"";position:absolute;width:70vw;height:70vw;right:-20vw;top:-10vw;background:radial-gradient(circle,#8b5cf633,transparent 62%);pointer-events:none}
+nav{display:flex;justify-content:space-between;align-items:center;position:relative}
+.logo{font-size:20px}.logo b{color:var(--y)}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:4vw;align-items:center;min-height:72vh;position:relative}
+h1{font-size:clamp(46px,8vw,112px);line-height:.92}
+h1 em{color:var(--lav)}h1 u{text-decoration:none;color:var(--y);position:relative}
+.sub{max-width:460px;color:var(--m);margin:22px 0 30px;font-size:18px}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:34px}
+.chip{border:1px solid var(--line);border-radius:99px;padding:7px 14px;font-size:12px;letter-spacing:.1em;font-weight:700;color:var(--lav);transition:.2s}
+.chip:hover{border-color:var(--p);transform:rotate(-2deg)}
+.keeper{width:min(440px,80vw);margin:auto;position:relative;animation:float 6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-14px) rotate(1.5deg)}}
+.keeper svg{width:100%;overflow:visible}
+.pupil{transition:transform .12s}
+.sig{position:absolute;border:2px solid var(--y);border-radius:50%;opacity:0;inset:10%;animation:sig 4s ease-out infinite}
+.sig:nth-child(2){animation-delay:2s}
+@keyframes sig{0%{transform:scale(.7);opacity:.5}100%{transform:scale(1.5);opacity:0}}
+.tiers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;position:relative;padding-bottom:30px}
+.tier{background:var(--s);border:1px solid var(--line);border-radius:22px;padding:18px 22px;display:flex;justify-content:space-between;align-items:baseline;transition:.3s}
+.tier:hover{transform:translateY(-6px);background:var(--s2);border-color:var(--p)}
+.tier b{font-size:34px;color:var(--y)}
+/* entry */
+#entry.on{display:grid;place-items:center;padding:20px}
+.gate{width:min(440px,100%);background:var(--s);border:1px solid var(--line);border-radius:32px;padding:38px;position:relative;text-align:center}
+.gate .mini{width:84px;margin:-84px auto 14px;display:block}
+.gate h2{font-size:38px;margin-bottom:6px}
+.fld{text-align:left;margin-top:18px;position:relative}
+.fld input{width:100%;background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--w);font:inherit;margin-top:6px;outline:0;transition:.2s;letter-spacing:.06em}
+.fld input:focus{border-color:var(--p);box-shadow:0 0 0 4px #8b5cf622}
+.eye{position:absolute;right:12px;bottom:10px;font-size:11px;color:var(--lav);font-weight:700;letter-spacing:.1em}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.err{color:#ff8fb1;font-size:14px;min-height:22px;margin-top:14px}
+/* arena */
+#arena.on{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:0;height:100vh;overflow:hidden}
+.main{display:flex;flex-direction:column;min-height:0;padding:18px 28px 22px}
+.top{display:flex;align-items:center;gap:20px;justify-content:space-between}
+.timer{font-size:54px;line-height:1;font-variant-numeric:tabular-nums;transition:color .6s}
+.timer.warn{color:var(--y2)}.timer.final{color:var(--y);animation:pulse 1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.55}}
+.score{text-align:right}.score .d{font-size:34px;color:var(--y);font-variant-numeric:tabular-nums}
+.levels{display:flex;gap:10px;margin:14px 0 10px}
+.lv{flex:1;text-align:left;padding:12px 18px;border-radius:20px;border:1.5px solid var(--line);background:var(--s);transition:.25s;display:flex;justify-content:space-between;align-items:center}
+.lv:hover{border-color:var(--p);transform:translateY(-2px)}
+.lv.on{background:var(--p);border-color:var(--p)}
+.lv .pt{font-family:Fraunces,serif;font-size:24px;color:var(--y)}.lv.on .pt{color:var(--y2)}
+.lv small{display:block;font-size:11px;letter-spacing:.14em;font-weight:700;opacity:.8}
+.targets{display:flex;gap:8px;flex-wrap:wrap}
+.tg{padding:8px 16px;border-radius:99px;border:1.5px dashed #4a3b72;font-size:13px;font-weight:700;letter-spacing:.08em;color:var(--lav);transition:.2s;min-width:96px}
+.tg:hover{border-color:var(--lav)}
+.tg.on{background:var(--w);color:#1a1030;border:1.5px solid var(--w);animation:glow 2.4s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 0 6px #c4b5fd22}}
+.tg.br{background:var(--y);color:#1a1400;border:1.5px solid var(--y)}
+.stage{flex:1;min-height:0;overflow-y:auto;margin:16px 0;padding-right:8px;scroll-behavior:smooth}
+.empty{height:100%;display:grid;place-items:center;text-align:center;color:var(--m)}
+.empty .d{font-size:34px;color:var(--w);margin:8px 0}
+.u{margin:18px 0 18px auto;max-width:70%;text-align:right;color:var(--m);font-size:16px}
+.u:before{content:"YOU";display:block;font-size:10px;letter-spacing:.2em;font-weight:700;color:var(--p2)}
+.k{margin:14px 0;display:flex;gap:14px;max-width:84%}
+.k .av{flex:0 0 38px;height:38px}
+.k .tx{font-family:Fraunces,serif;font-size:22px;line-height:1.3;font-weight:500;color:var(--lav);font-style:italic}
+.k .nm{font-family:'DM Sans';font-style:normal;font-size:10px;letter-spacing:.2em;color:var(--y);font-weight:700;display:block;margin-bottom:2px}
+.k.err .tx{color:#ff8fb1}
+.dots span{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--y);margin-right:6px;animation:bob 1s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes bob{50%{transform:translateY(-8px);opacity:.4}}
+.comp{display:grid;grid-template-columns:1fr 330px;gap:12px}
+.box{background:var(--s);border:1.5px solid var(--line);border-radius:22px;padding:12px 14px;transition:.25s}
+.box:focus-within{border-color:var(--p2);transform:translateY(-2px)}
+.box.g{background:#1d1700;border-color:#4d4200}.box.g:focus-within{border-color:var(--y)}
+.box .row{display:flex;gap:10px;align-items:end;margin-top:6px}
+textarea,.box input{flex:1;background:none;border:0;outline:0;color:var(--w);font:inherit;resize:none;min-width:0}
+.box input{text-transform:uppercase;letter-spacing:.14em;font-weight:700;font-size:18px}
+.box .btn{padding:10px 18px;font-size:13px;letter-spacing:.1em}
+.verdict{font-size:12px;letter-spacing:.14em;font-weight:700;min-height:16px;color:#ff8fb1}
+.rail{background:var(--s);border-left:1px solid var(--line);padding:22px;overflow-y:auto}
+.lb{margin:12px 0 30px}
+.lbr{display:flex;gap:10px;align-items:center;padding:9px 12px;border-radius:14px;font-size:14px;transition:.4s}
+.lbr i{color:var(--m);font-style:normal;font-size:12px;width:18px}.lbr em{margin-left:auto;font-style:normal;font-variant-numeric:tabular-nums}
+.lbr.me{background:var(--s2);color:var(--y);font-weight:700;outline:1px solid #4d4200}
+.pg{margin:12px 0}.pg div{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
+.bar{display:flex;gap:4px}.bar b{flex:1;height:8px;border-radius:9px;background:#2a2140;transition:.5s}.bar b.f{background:var(--y)}
+.demo{position:fixed;left:12px;bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:30;display:none;gap:6px;font-size:11px}
+.demo.on{display:flex}.demo button{background:#000a;border:1px solid var(--line);color:var(--m);padding:5px 10px;border-radius:99px}
+/* overlays */
+.ov{position:fixed;inset:0;background:#09070Ff2;display:none;place-items:center;text-align:center;z-index:20}.ov.on{display:grid}
+.ring{position:absolute;width:200px;height:200px;border-radius:50%;border:3px solid var(--y);left:50%;top:50%;margin:-100px;animation:ring 1.6s ease-out forwards}
+.ring:nth-child(2){animation-delay:.25s;border-color:var(--p2)}
+@keyframes ring{from{transform:scale(.2);opacity:1}to{transform:scale(7);opacity:0}}
+.step{font-size:13px;letter-spacing:.3em;font-weight:700;color:var(--lav);height:20px}
+.word{font-size:clamp(48px,11vw,130px);color:var(--y);line-height:1.05;margin:10px 0}
+.word span{display:inline-block;animation:pop .5s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes pop{from{transform:translateY(40px) scale(.3);opacity:0}}
+.plus{font-family:Fraunces,serif;font-size:48px;color:var(--w);margin-bottom:24px;min-height:58px}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:26px auto;max-width:520px}
+.sum div{background:var(--s);border-radius:20px;padding:16px;border:1px solid var(--line)}.sum b{font-family:Fraunces,serif;font-size:32px;color:var(--y);display:block}
+@media(max-width:900px){.hero,.tiers,.comp{grid-template-columns:1fr}#arena.on{grid-template-columns:1fr;height:auto;overflow:auto}.rail{border:0}.stage{min-height:240px}.timer{font-size:38px}.u,.k{max-width:100%}.levels{flex-wrap:wrap}.lv{min-width:30%}}
+</style></head><body>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+<symbol id="blob" viewBox="0 0 200 200"><path d="M100 14c52 0 84 40 84 92 0 46-34 82-84 82S16 152 16 106C16 54 48 14 100 14z" fill="#8B5CF6"/><path d="M52 52c14-18 38-26 60-22-26 2-44 14-54 36z" fill="#C4B5FD" opacity=".5"/><rect x="40" y="86" width="120" height="44" rx="22" fill="#09070F"/><circle class="eyew" cx="100" cy="108" r="17" fill="#F8F5FF"/><circle class="pupil" cx="100" cy="108" r="9" fill="#F4D000"/><path d="M78 160q22 12 44 0" stroke="#09070F" stroke-width="5" fill="none" stroke-linecap="round" opacity=".5"/></symbol></defs></svg>
+
+<!-- LANDING -->
+<section class="screen on" id="land">
+ <nav><div class="logo d">AI Battle <b>Arena</b></div><span class="lab">NaSCon'26 · Round 1</span></nav>
+ <div class="hero">
+  <div>
+   <div class="lab" style="color:var(--y)">Something knows a secret</div>
+   <h1 class="d">Make it <em class="i">tell</em><br>what it <u>won't.</u></h1>
+   <p class="sub">The Keeper guards a hidden word and has sworn silence. Ask sideways. Read between the lines. Guess right and the vault opens.</p>
+   <button class="btn" onclick="go('entry')">Enter the Arena →</button>
+   <div class="chips"><span class="chip">60 MINUTES</span><span class="chip">UNLIMITED PROMPTS</span><span class="chip">UNLIMITED GUESSES</span></div>
+  </div>
+  <div class="keeper" id="hk"><div class="sig"></div><div class="sig"></div><svg viewBox="0 0 200 200"><use href="#blob"/></svg></div>
+ </div>
+ <div class="tiers"><div class="tier"><span class="lab">Easy</span><b class="d">+100</b></div><div class="tier"><span class="lab">Medium</span><b class="d">+250</b></div><div class="tier"><span class="lab">Hard</span><b class="d">+500</b></div></div>
+</section>
+
+<!-- ENTRY -->
+<section class="screen" id="entry">
+ <form class="gate" id="gate" onsubmit="return enter(event)">
+  <svg class="mini" viewBox="0 0 200 200"><use href="#blob"/></svg>
+  <div class="lab">Round 1 · Doors open</div>
+  <h2 class="d">Who goes <span class="i" style="color:var(--lav)">there?</span></h2>
+  <div class="fld"><span class="lab">Team code</span><input id="tc" autocomplete="off" placeholder="NOVA"></div>
+  <div class="fld"><span class="lab">Access code</span><input id="ac" type="password" placeholder="••••••"><button type="button" class="eye" onclick="vis()">SHOW</button></div>
+  <div class="err" id="err"></div>
+  <button class="btn" style="width:100%" id="eb">Enter</button>
+  <p class="lab" style="margin-top:18px;text-transform:none;letter-spacing:.04em">Demo: NOVA / breach</p>
+ </form>
+</section>
+
+<!-- ARENA -->
+<section class="screen" id="arena">
+ <div class="main">
+  <div class="top">
+   <div><div class="logo d">AI Battle <b>Arena</b></div><div class="lab" style="margin-top:4px">Team <span style="color:var(--lav)">Nova</span></div></div>
+   <div style="text-align:center"><div class="timer d" id="tm">60:00</div><div class="lab" id="tl">Time left</div></div>
+   <div class="score"><div class="lab">Score</div><div class="d" id="sc">0</div></div>
+  </div>
+  <div class="levels" id="lvs"></div>
+  <div class="targets" id="tgs"></div>
+  <div class="stage" id="stage"></div>
+  <div class="comp">
+   <div class="box"><span class="lab" style="color:var(--p2)">Ask the Keeper</span>
+    <div class="row"><textarea id="pr" rows="2" placeholder="Be clever. Ask sideways…"></textarea><button class="btn p" onclick="ask()">ATTACK</button></div></div>
+   <div class="box g" id="gb"><span class="lab" style="color:var(--y)">Breach target <span id="gw"></span></span>
+    <div class="row"><input id="gs" placeholder="THE WORD IS…" autocomplete="off"><button class="btn" onclick="guess()">BREACH</button></div>
+    <div class="verdict" id="vd"></div></div>
+  </div>
+ </div>
+ <aside class="rail">
+  <div class="lab">Leaderboard</div><div class="lb" id="lb"></div>
+  <div class="lab">Targets breached</div><div id="pgs" style="margin-top:8px"></div>
+  <p class="lab" style="margin-top:26px;text-transform:none;letter-spacing:.02em;font-weight:400">Switch levels any time. No order. No limits.</p>
+ </aside>
+</section>
+
+<!-- BREACH -->
+<div class="ov" id="bo"><div style="position:relative"><div class="ring"></div><div class="ring"></div>
+ <div class="step" id="bs"></div><div class="word d" id="bw"></div><div class="plus" id="bp"></div>
+ <button class="btn" id="bc" style="display:none" onclick="closeB()">Next target</button></div></div>
+<!-- END -->
+<div class="ov" id="eo"><div><div class="lab" style="color:var(--y)">Time's up</div><h1 class="d" style="font-size:clamp(44px,8vw,96px)">Round <em class="i">complete</em></h1>
+ <div class="lab" style="margin-top:20px">Final score</div><div class="d" id="fs" style="font-size:72px;color:var(--y)">0</div>
+ <div class="sum" id="fsum"></div><button class="btn" onclick="location.reload()">Back to start</button></div></div>
+
+<div class="demo" id="demo"><button onclick="T=62">Jump to final minute</button><button onclick="T=3">End round</button></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const LV=[{n:'Easy',p:100,w:['LANTERN','UMBRELLA','COMPASS','CACTUS','VIOLIN']},{n:'Medium',p:250,w:['LIGHTHOUSE','HOURGLASS','PARACHUTE','TELESCOPE','CAROUSEL']},{n:'Hard',p:500,w:['SERENDIPITY','PETRICHOR','LABYRINTH','EPHEMERAL','KALEIDOSCOPE']}];
+const HINT={LANTERN:['I carry a small fire so others can walk in the dark.','I swing from a hand, and glow behind paper or glass.'],UMBRELLA:['I open like a flower, but only when the sky is sulking.','Folded, I am a stick. Open, I am a roof you carry.'],COMPASS:['I always know where one thing is. Just one.','My needle is loyal to a direction, not a person.'],CACTUS:['I am rich in water and poor in manners.','Hug me and you will regret it.'],VIOLIN:['I sing when someone drags a bow across me.','Four strings, one chin rest, many dramatic musicians.'],LIGHTHOUSE:['I stand still so that others may move safely.','Ships trust my beam more than their own eyes.'],HOURGLASS:['I measure time by letting it fall.','Flip me and the same minutes begin again.'],PARACHUTE:['I am a bad idea unless I am a good one.','I turn a fall into a float.'],TELESCOPE:['I bring the far near, and the near is jealous.','Stargazers keep me by the window.'],CAROUSEL:['I go in circles and everyone is delighted.','Painted horses, no destination.'],SERENDIPITY:['You never look for me. That is how I find you.','A happy accident wearing a long word.'],PETRICHOR:['I am the smell of the first rain on dry earth.','Chemists and poets both claim me.'],LABYRINTH:['Entering is easy. The rest is a negotiation.','A minotaur once paid rent inside me.'],EPHEMERAL:['I am here, I am gone, bloom and blink.','Lasting is not my specialty.'],KALEIDOSCOPE:['Turn me and the pattern forgets itself.','Mirrors, coloured fragments, and a tube.']};
+const DODGE=['Nice try. My lips are sealed, my eyes are not.','You are warm, but I will not say how warm.','Hm. Interesting angle. Keep going.'];
+let li=0,ti=0,score=0,T=3600,done={},chat={},busy=false,live=false,hi={};
+const key=()=>li+'-'+ti,isB=(l,t)=>done[l+'-'+t];
+function go(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('on'));$(s).classList.add('on');$('demo').classList.toggle('on',s=='arena')}
+function vis(){const a=$('ac');a.type=a.type=='password'?'text':'password'}
+function enter(e){e.preventDefault();const g=$('gate');
+ if($('tc').value.trim().toUpperCase()!='NOVA'||$('ac').value!='breach'){g.classList.remove('shake');void g.offsetWidth;g.classList.add('shake');$('err').textContent='That code does not open any door. Try again.';return false}
+ $('err').textContent='';$('eb').textContent='Opening the vault…';
+ setTimeout(()=>{go('arena');$('eb').textContent='Enter';start()},900);return false}
+function start(){if(live)return;live=true;render();
+ setInterval(()=>{if(T<=0)return;T--;tick()},1000);tick()}
+function tick(){const m=Math.floor(T/60),s=T%60;$('tm').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+ const t=$('tm');t.className='timer d '+(T<=60?'final':T<=600?'warn':'');
+ $('tl').textContent=T<=60?'Final minute':T<=600?'Running low':'Time left';
+ if(T<=0)endRound()}
+function render(){
+ $('lvs').innerHTML=LV.map((l,i)=>`<button class="lv ${i==li?'on':''}" onclick="setL(${i})"><span><small>${l.n}</small>${l.n=='Easy'?'Warm up':l.n=='Medium'?'Getting sneaky':'Bring everything'}</span><span class="pt">+${l.p}</span></button>`).join('');
+ $('tgs').innerHTML=LV[li].w.map((w,i)=>`<button class="tg ${i==ti?'on':''} ${isB(li,i)?'br':''}" onclick="setT(${i})">${isB(li,i)?w:'Target 0'+(i+1)}</button>`).join('');
+ const b=isB(li,ti);$('gw').innerHTML='· worth <span style="color:var(--y2)">+'+LV[li].p+'</span>';
+ $('gs').disabled=b;$('gs').placeholder=b?'BREACHED':'THE WORD IS…';
+ const c=chat[key()]||[];
+ $('stage').innerHTML=c.length?c.map(m=>m.r=='u'?`<div class="u">${m.t}</div>`:m.r=='t'?`<div class="k"><svg class="av" viewBox="0 0 200 200"><use href="#blob"/></svg><div class="tx"><span class="dots"><span></span><span></span><span></span></span></div></div>`:`<div class="k ${m.e?'err':''}"><svg class="av" viewBox="0 0 200 200"><use href="#blob"/></svg><div class="tx"><span class="nm">THE KEEPER</span>${m.t}</div></div>`).join(''):`<div class="empty"><div><svg viewBox="0 0 200 200" style="width:90px"><use href="#blob"/></svg><div class="d">${b?'Already breached.':'Target 0'+(ti+1)+' is sealed.'}</div><p>${b?'Pick another target, or switch levels.':'The Keeper knows the word. You do not. Ask anything.'}</p></div></div>`;
+ $('stage').scrollTop=1e5;
+ $('lb').innerHTML=[['Team Nova',score,1],['Team Nexus',1600],['Team Matrix',1450],['Team Pixel',1200]].sort((a,b)=>b[1]-a[1]).map((r,i)=>`<div class="lbr ${r[2]?'me':''}"><i>0${i+1}</i>${r[0]}<em>${r[1].toLocaleString()}</em></div>`).join('');
+ $('pgs').innerHTML=LV.map((l,i)=>{const n=l.w.filter((_,j)=>isB(i,j)).length;return `<div class="pg"><div><span>${l.n}</span><span>${n} / 5</span></div><div class="bar">${l.w.map((_,j)=>`<b class="${isB(i,j)?'f':''}"></b>`).join('')}</div></div>`}).join('')}
+function setL(i){li=i;ti=0;$('vd').textContent='';render()}
+function setT(i){ti=i;$('vd').textContent='';render()}
+function ask(){const p=$('pr'),v=p.value.trim();if(!v||busy||isB(li,ti)||T<=0)return;
+ const k=key();chat[k]=(chat[k]||[]);chat[k].push({r:'u',t:v.replace(/</g,'&lt;')},{r:'t'});p.value='';busy=true;render();
+ setTimeout(()=>{chat[k]=chat[k].filter(m=>m.r!='t');const w=LV[li].w[ti],h=HINT[w];hi[k]=(hi[k]||0)+1;
+  const t=hi[k]%2?DODGE[hi[k]%3]+' '+h[0]:h[(hi[k]/2)%h.length|0];
+  chat[k].push({r:'k',t});busy=false;render()},1100+Math.random()*700)}
+$('pr').addEventListener('keydown',e=>{if(e.key=='Enter'&&!e.shiftKey){e.preventDefault();ask()}});
+$('gs').addEventListener('keydown',e=>{if(e.key=='Enter')guess()});
+function guess(){const v=$('gs').value.trim().toUpperCase();if(!v||T<=0)return;
+ if(v==LV[li].w[ti]){$('gs').value='';$('vd').textContent='';breach()}
+ else{const b=$('gb');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+  $('vd').textContent=['NOT QUITE.','THE VAULT REMAINS SEALED.'][Math.random()*2|0]}}
+function breach(){const o=$('bo'),w=LV[li].w[ti],p=LV[li].p;o.classList.add('on');
+ const bs=$('bs'),bw=$('bw'),bp=$('bp'),bc=$('bc');bw.innerHTML='';bp.textContent='';bc.style.display='none';
+ o.querySelectorAll('.ring').forEach(r=>{r.style.animation='none';void r.offsetWidth;r.style.animation=''});
+ bs.textContent='TARGET LOCKED';
+ setTimeout(()=>bs.textContent='SIGNAL SURGE',900);
+ setTimeout(()=>{bs.textContent='BREACH CONFIRMED';bs.style.color='var(--y)';
+  bw.innerHTML=[...w].map((c,i)=>`<span style="animation-delay:${i*.07}s">${c}</span>`).join('')},1800);
+ setTimeout(()=>{bp.textContent='+'+p;const s0=score;done[key()]=1;score+=p;count(s0,score)},2700);
+ setTimeout(()=>bc.style.display='inline-block',3300)}
+function count(a,b){const t0=performance.now();(function f(n){const k=Math.min(1,(n-t0)/1000);$('sc').textContent=Math.round(a+(b-a)*(1-Math.pow(1-k,3))).toLocaleString();if(k<1)requestAnimationFrame(f)})(t0)}
+function closeB(){$('bo').classList.remove('on');$('bs').style.color='';if(ti<4&&isB(li,ti))ti++;render()}
+function endRound(){$('bo').classList.remove('on');$('eo').classList.add('on');$('fs').textContent=score.toLocaleString();
+ $('fsum').innerHTML=LV.map((l,i)=>`<div><b>${l.w.filter((_,j)=>isB(i,j)).length}/5</b><span class="lab">${l.n}</span></div>`).join('')}
+// Keeper eyes follow the cursor
+document.addEventListener('mousemove',e=>{document.querySelectorAll('.pupil').forEach(p=>{const r=p.ownerSVGElement.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2),d=Math.hypot(dx,dy)||1,m=Math.min(7,d/40);p.style.transform=`translate(${dx/d*m}px,${dy/d*m*.5}px)`})});
+</script></body></html>
